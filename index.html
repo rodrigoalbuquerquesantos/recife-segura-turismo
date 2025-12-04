@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recife Segura - Guia de Segurança Ativa 5.7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluindo a biblioteca QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Configuração de Fonte e Estilo Básico */
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdfa; }
+        .tab-button.active { background-color: #008080; color: white; border-color: #008080; }
+        .tab-button { transition: all 0.2s; }
+        .card { background-color: white; border: 1px solid #e0e0e0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .quiz-option { cursor: pointer; transition: background-color 0.2s; }
+        .quiz-option:hover { background-color: #e6fffa; }
+        .correct-answer { background-color: #a7f3d0 !important; }
+        .incorrect-answer { background-color: #fecaca !important; }
+       
+        /* Estilo para os cards do painel inicial */
+        /* Estilo para os cards do painel inicial */
+.initial-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border-left: 5px solid;
+    display: flex; /* Mantido: Necessário para alinhar e espaçar os itens */
+    align-items: center;
+
+    /* LINHA CORRIGIDA: Substitui 'space-x: 4;' inválido */
+    gap: 1rem; /* 1rem é o equivalente a '4' na escala de espaçamento do Tailwind (16px) */
+    
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+        .initial-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            border-left-width: 8px;
+        }
+
+        /* ESTILO PARA O BOTÃO SOS FIXO E FLUTUANTE */
+        .sos-button-fixed {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #dc2626;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.5), 0 4px 6px -4px rgba(220, 38, 38, 0.5);
+            transition: background-color 0.2s, transform 0.2s;
+            line-height: 1.1;
+        }
+        .sos-button-fixed:hover {
+            background-color: #b91c1c;
+            transform: scale(1.05);
+        }
+        .sos-button-fixed svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 2px;
+        }
+        /* Estilo para a barra de status de rastreamento */
+        .tracking-status {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { background-color: #fca5a5; }
+            50% { background-color: #ef4444; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Cabeçalho -->
+        <header class="text-center mb-6 p-4 rounded-xl bg-cyan-700 shadow-xl text-white">
+            <h1 class="text-3xl font-extrabold sm:text-4xl">Recife Segura App</h1>
+            <p class="text-lg mt-1 font-light">Seu guia essencial de Segurança Ativa</p>
+        </header>
+
+        <!-- Botão QR Code (Fixo no topo para fácil acesso) -->
+        <div class="flex justify-end mb-4">
+            <button id="qrCodeButton" class="w-full sm:w-auto px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-xl shadow-md transition duration-150 ease-in-out text-base">
+                Abrir no Celular (QR Code)
+            </button>
+        </div>
+       
+        <!-- Conteúdo Principal Dinâmico -->
+        <div id="app-container">
+
+            <!-- Painel Inicial (Menu Principal) -->
+            <div id="initial-screen" class="tab-pane hidden">
+                <div class="card p-6 rounded-xl text-center mb-6 bg-cyan-50 border-cyan-300">
+                    <h2 class="text-3xl font-extrabold mb-2 text-cyan-800">Bem-vindo(a) à Recife! 🦈</h2>
+                    <p class="text-gray-700 font-semibold">Ative sua segurança e confira as dicas e alertas para aproveitar a cidade.</p>
+                </div>
+               
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   
+                    <!-- 1. Card de Navegação: ROTA SEGURA -->
+                    <a href="#rastreamento" class="initial-card border-l-red-500 hover:bg-red-50">
+                        <span class="text-3xl" role="img" aria-label="GPS">📍</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-red-700">Rota Segura (Rastreamento)</p>
+                            <p class="text-sm text-gray-600">Compartilhamento de Rota em Tempo Real com Contato.</p>
+                        </div>
+                    </a>
+
+                    <!-- 2. Card de Navegação: RISCO & BAIRROS -->
+                    <a href="#risco" class="initial-card border-l-orange-500 hover:bg-orange-50">
+                        <span class="text-3xl" role="img" aria-label="Alerta">🚨</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-orange-700">Risco & Bairros (Mapa Detalhado)</p>
+                            <p class="text-sm text-gray-600">Áreas de Atenção Redobrada (Tubarão e Urbano).</p>
+                        </div>
+                    </a>
+
+                    <!-- 3. Card de Navegação: B.O. RÁPIDO -->
+                    <a href="#bo" class="initial-card border-l-purple-500 hover:bg-purple-50">
+                        <span class="text-3xl" role="img" aria-label="Documento">📄</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-purple-700">B.O. Rápido (Guia Online)</p>
+                            <p class="text-sm text-gray-600">Checklist e link para registro online de Furto/Perda.</p>
+                        </div>
+                    </a>
+
+                    <!-- 4. Card de Navegação: DICAS DE PREVENÇÃO -->
+                    <a href="#dicas" class="initial-card border-l-green-500 hover:bg-green-50">
+                        <span class="text-3xl" role="img" aria-label="Escudo">🛡</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-green-700">Dicas de Prevenção</p>
+                            <p class="text-sm text-gray-600">Orientações por Categoria (Mulheres, Família, Celular).</p>
+                        </div>
+                    </a>
+
+                    <!-- 5. Card de Navegação: SERVIÇOS DE APOIO -->
+                    <a href="#servicos" class="initial-card border-l-teal-500 hover:bg-teal-50">
+                        <span class="text-3xl" role="img" aria-label="Hospital">🏥</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-teal-700">Serviços de Apoio</p>
+                            <p class="text-sm text-gray-600">Localização das UPAs 24h e Pontos de Referência para Denúncia.</p>
+                        </div>
+                    </a>
+                   
+                    <!-- 6. Card de Navegação: CULTURA & LAZER -->
+                    <a href="#lazer" class="initial-card border-l-indigo-500 hover:bg-indigo-50">
+                        <span class="text-3xl" role="img" aria-label="Máscara">🎭</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-indigo-700">Cultura & Lazer</p>
+                            <p class="text-sm text-gray-600">Museus, Passeios Icônicos e Curiosidades da "Veneza Brasileira".</p>
+                        </div>
+                    </a>
+                   
+                    <!-- 7. Card de Navegação: EMERGÊNCIA (Sempre em destaque) -->
+                    <a href="#contatos" class="initial-card sm:col-span-2 border-l-yellow-500 hover:bg-yellow-50">
+                        <span class="text-3xl" role="img" aria-label="Telefone">☎</span>
+                        <div class="ml-4">
+                            <p class="font-bold text-lg text-yellow-700">Contatos de Emergência (190, 192, etc.)</p>
+                            <p class="text-sm text-gray-600">Números essenciais de Polícia, SAMU e Denúncia Rápida.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navegação de Abas (Visível para facilitar a troca entre as abas, após sair do Painel Inicial) -->
+            <div id="tab-navigation" class="flex flex-wrap justify-center mb-6 bg-white p-2 rounded-xl shadow-md space-x-1 sm:space-x-2 hidden">
+                <button data-tab="rastreamento" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Rota Segura</button>
+                <button data-tab="risco" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Risco & Bairros</button>
+                <button data-tab="bo" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">B.O. Rápido</button>
+                <button data-tab="dicas" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Dicas</button>
+                <button data-tab="servicos" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Serviços</button>
+                <button data-tab="lazer" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Cultura/Lazer</button>
+                <button data-tab="contatos" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent">Emergência</button>
+                <button data-tab="initial-screen" class="tab-button px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-transparent text-gray-500 hover:text-cyan-700">Início</button>
+            </div>
+
+
+            <!-- Conteúdo Detalhado das Abas -->
+            <div id="tabContent">
+               
+                <!-- 1. RASTREAMENTO DE ROTA -->
+                <div id="rastreamento" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl space-y-6">
+                        <h2 class="text-2xl font-bold mb-4 text-red-700">Rota Segura: Rastreamento Contínuo (SOS Família)</h2>
+                        <p class="text-gray-700">Ative esta função para compartilhar sua localização em tempo real com seu contato de segurança enquanto estiver a pé ou em trânsito. O link é atualizado a cada 10 segundos (simulado).</p>
+                       
+                        <!-- Funcionalidade: Rastreamento de Rota em Tempo Real (Simulado) -->
+                        <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                            <h3 class="font-bold text-xl text-red-700 mb-3">Ativar Monitoramento</h3>
+                           
+                            <input type="text" id="tracking-contact" placeholder="Nome do Contato de Segurança (Ex: João, Maria)" class="w-full p-2 border rounded mb-2 text-sm focus:ring-red-500 focus:border-red-500">
+                           
+                            <div class="flex space-x-2">
+                                <button id="start-tracking" class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
+                                    Iniciar Rastreamento
+                                </button>
+                                <button id="stop-tracking" class="flex-1 py-2 bg-gray-400 hover:bg-gray-500 text-white font-bold rounded-lg transition" disabled>
+                                    Parar Rastreamento
+                                </button>
+                            </div>
+
+                            <div id="tracking-output" class="hidden mt-3 p-3 bg-white border border-dashed border-red-400 rounded">
+                                <p class="text-xs text-gray-500 mb-1 font-mono tracking-status" id="tracking-status-bar">Aguardando Início...</p>
+                                <p id="tracking-message" class="text-sm font-mono text-gray-900 break-words"></p>
+                                <button id="copy-tracking-text" class="mt-2 text-xs text-red-600 hover:text-red-800 font-semibold">
+                                    Copiar Última Mensagem
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. RISCO & BAIRROS (ABA SEPARADA) - LIMPEZA DE ASTERISCOS -->
+                <div id="risco" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-orange-700">Mapa de Risco e Atenção Redobrada</h2>
+                        <p class="text-gray-700 mb-6">Esta seção é baseada em alertas de segurança pública e relatos, exigindo atenção extra nessas zonas e horários específicos. Cada bairro tem seu risco, esteja atenta!</p>
+
+                        <!-- RISCO CRÍTICO: TUBARÕES (NOVA SEÇÃO) -->
+                        <div class="p-4 mb-6 bg-red-200 border-l-8 border-red-700 rounded-lg shadow-lg">
+                            <h3 class="font-bold text-2xl flex items-center text-red-900 mb-3">
+                                <span class="mr-2 text-3xl">⚠🦈</span> RISCO CRÍTICO: PRAIA DE BOA VIAGEM
+                            </h3>
+                            <p class="text-base font-semibold text-red-800 mb-2">Proibido o banho de mar nas áreas de mar aberto, especialmente na maré alta.</p>
+                            <ul class="list-disc list-inside text-red-900 ml-4 text-sm mt-1 space-y-1">
+                                <li class="font-bold">Regra de Ouro: Tome banho EXCLUSIVAMENTE nas piscinas naturais formadas pelo arrecife na maré baixa.</li>
+                                <li class="font-bold">Perigo: O tubarão avança com a maré cheia, ultrapassando o arrecife. Nunca entre na água com maré alta, escura ou agitada.</li>
+                                <li>Atenção: Os ataques são raros, mas reais e fatais. Priorize a segurança sempre.</li>
+                            </ul>
+                        </div>
+                       
+                        <div class="space-y-4">
+                            <!-- Zona Sul: Boa Viagem, Pina -->
+                            <div class="p-4 bg-orange-100 border-l-4 border-orange-500 rounded-lg">
+                                <h3 class="font-bold text-xl text-orange-700 mb-2">Zona Sul (Boa Viagem, Pina) - Risco Urbano</h3>
+                                <p class="text-sm font-semibold text-gray-800">Risco: Alto para furto e roubo de celular a pedestres e ciclistas.</p>
+                                <ul class="list-disc list-inside text-gray-700 ml-4 text-sm mt-1">
+                                    <li class="font-bold">Atenção Redobrada: Ruas transversais da Av. Boa Viagem (especialmente à noite).</li>
+                                    <li>Praia: Evite usar eletrônicos de valor na areia. Guarde o celular em bolsos internos ao caminhar no calçadão.</li>
+                                    <li>Semáforos: Mantenha os vidros fechados e pertences fora da vista.</li>
+                                </ul>
+                            </div>
+                           
+                            <!-- Centro: São José, Santo Antônio, Bairro do Recife -->
+                            <div class="p-4 bg-red-100 border-l-4 border-red-700 rounded-lg">
+                                <h3 class="font-bold text-xl text-red-700 mb-2">Centro (São José, Santo Antônio, Recife Antigo)</h3>
+                                <p class="text-sm font-semibold text-gray-800">Risco: MUITO ALTO para furtos (carteiras, bolsas) e roubos nas áreas de grande fluxo.</p>
+                                <ul class="list-disc list-inside text-gray-700 ml-4 text-sm mt-1">
+                                    <li class="font-bold">Feiras e Mercados: Mantenha a bolsa à frente do corpo e fechada. Evite contato visual prolongado com estranhos.</li>
+                                    <li>Recife Antigo: Movimentado durante o dia e eventos. Em dias/noites calmos, a área fica isolada. Use sempre táxi/app de transporte até a porta.</li>
+                                    <li>Horário Crítico: Fim da tarde e começo da noite (17h - 20h).</li>
+                                </ul>
+                            </div>
+
+                            <!-- Zona Oeste: Cordeiro, Iputinga -->
+                            <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-lg">
+                                <h3 class="font-bold text-xl text-yellow-700 mb-2">Zona Oeste (Cordeiro, Iputinga, Várzea)</h3>
+                                <p class="text-sm font-semibold text-gray-800">Risco: Moderado/Alto para assaltos em paradas de ônibus e pontos de acesso de BRs.</p>
+                                <ul class="list-disc list-inside text-gray-700 ml-4 text-sm mt-1">
+                                    <li>Transporte Público: Espere o ônibus em locais movimentados e bem iluminados.</li>
+                                    <li>Tênis e Correntes: Evite usar objetos de marca ou de valor aparente ao caminhar.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. B.O. RÁPIDO (ABA SEPARADA) -->
+                <div id="bo" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-purple-700">B.O. Rápido: Guia para Registro Online</h2>
+                        <p class="text-gray-700 mb-6">Use a Delegacia Virtual de Pernambuco para registrar ocorrências de <span class="font-bold">Furto</span> ou <span class="font-bold">Perda de Documentos</span>. O aplicativo facilita a coleta das informações essenciais antes do registro oficial.</p>
+                       
+                        <!-- Guia Rápido B.O. Online -->
+                        <div class="p-4 bg-purple-50 border-l-4 border-purple-500 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3 text-purple-700">Checklist Pré-Registro (O que você precisa saber)</h3>
+                           
+                            <ol class="list-decimal list-inside text-gray-700 space-y-2 ml-4">
+                                <li><span class="font-bold">Confirme a Viabilidade:</span> Apenas Furto (sem violência) ou Perda podem ser registrados online. Roubo (com violência) requer registro presencial, ou ligue 190.</li>
+                                <li><span class="font-bold">Detalhes do Fato:</span> Você deve saber Data, Hora e Endereço Exato onde o fato ocorreu (ou onde notou a perda).</li>
+                                <li><span class="font-bold">Informações de Objeto:</span> Se foi celular, tenha o IMEI (código de 15 dígitos) em mãos. Para documentos, saiba o número e órgão emissor.</li>
+                                <li><span class="font-bold">Vítima:</span> Dados pessoais (Nome, CPF, Telefone) de quem foi furtado/perdeu o objeto.</li>
+                            </ol>
+
+                            <a id="bo-link" href="https://delegaciavirtual.sds.pe.gov.br/" target="_blank" class="block w-full text-center mt-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition">
+                                Acessar Delegacia Virtual PE (Abrir em nova janela)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. DICAS DE PREVENÇÃO (ABA SEPARADA) -->
+                <div id="dicas" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl space-y-6">
+                        <h2 class="text-2xl font-bold mb-4 text-green-700">Dicas de Prevenção por Categoria</h2>
+                        <p class="text-gray-700">Recomendamos a leitura de todas as dicas para aumentar sua segurança em diferentes situações.</p>
+                       
+                        <!-- Dicas para Mulheres -->
+                        <div class="p-4 bg-pink-50 border-l-4 border-pink-500 rounded-lg">
+                            <h4 class="font-bold text-xl text-pink-700 mb-2">Para Mulheres: Autodefesa e Prevenção de Violência</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4 text-sm">
+                                <li><span class="font-bold">Rota Alternativa:</span> Sempre que possível, evite caminhos desertos ou mal iluminados, mesmo que sejam mais curtos.</li>
+                                <li><span class="font-bold">Apps de Transporte:</span> Prefira a opção de motorista mulher. Use a função Rota Segura em todas as viagens de carro ou a pé.</li>
+                               
+                                <li>Assédio/Importunação: Em ônibus ou locais públicos, grite por ajuda ou denuncie imediatamente ao 180 (Disque Denúncia). Não se sinta envergonhada, o agressor é o único culpado.</li>
+                                <li>Bebidas: Em bares, nunca aceite bebida de desconhecidos e mantenha seu copo sempre em mãos e à vista.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Dicas para Famílias/Crianças -->
+                        <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+                            <h4 class="font-bold text-xl text-blue-700 mb-2">Para Famílias/Crianças: Prevenção e Primeiro Cuidado</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4 text-sm">
+                                <li><span class="font-bold">Regra dos Três:</span> Ensine a criança a procurar um policial, uma mãe com outra criança ou um segurança/funcionário de loja, se estiverem perdidas.</li>
+                                <li><span class="font-bold">Identificação:</span> Use pulseiras de identificação (nome/telefone) em eventos grandes ou praias. Tire uma foto da criança antes de sair para ter a roupa exata como referência rápida.</li>
+                                <li><span class="font-bold">Perigo na Praia:</span> Lembre-se, o banho de mar deve ser feito apenas nas piscinas naturais na maré baixa. Crianças devem ser constantemente monitoradas.</li>
+                                <li>Hidratação Extrema: O calor em Recife é forte. Crianças se desidratam rápido. Ofereça água e use protetor solar a cada 2 horas.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Dicas para Celulares e Eletrônicos -->
+                        <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
+                            <h4 class="font-bold text-xl text-yellow-700 mb-2">Celulares e Eletrônicos: Prevenção de Furto Qualificado</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4 text-sm">
+                                <li><span class="font-bold">Princípio da Distração Zero:</span> Evite o uso de celular na rua, principalmente em calçadas próximas à rua ou em semáforos. A distração é o principal fator de risco.</li>
+                                <li><span class="font-bold">Senhas e Biometria:</span> Configure o bloqueio de tela para o menor tempo possível. Utilize senhas fortes e o máximo de segurança biométrica/facial que o aparelho permitir.</li>
+                                <li>Contas Bancárias: Use aplicativos de bancos com "modo seguro" (que esconde o saldo) ou que exijam autenticação adicional. Nunca salve senhas de bancos no navegador.</li>
+                                <li>IMEI: Anote o número de IMEI do seu celular. É essencial para o B.O. e para bloquear o aparelho na operadora.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+               
+                <!-- 5. SERVIÇOS DE APOIO (COM UPAS 24H) -->
+                <div id="servicos" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-teal-700">Pontos de Apoio e Serviços Essenciais</h2>
+                       
+                        <h3 class="text-xl font-semibold mt-4 mb-2 text-blue-700">Saúde: UPAs 24h em Recife</h3>
+                        <p class="text-sm text-gray-700 mb-4">Em caso de urgência e emergência não traumática, procure as Unidades de Pronto Atendimento (UPAs) mais próximas:</p>
+                        <ul class="list-disc list-inside space-y-1 text-gray-700 ml-4">
+                            <li><span class="font-bold">UPA da Imbiribeira:</span> (Zona Sul)</li>
+                            <li><span class="font-bold">UPA de Santo Amaro:</span> (Centro)</li>
+                            <li><span class="font-bold">UPA da Caxangá:</span> (Zona Oeste)</li>
+                            <li><span class="font-bold">UPA de Nova Descoberta:</span> (Zona Norte)</li>
+                            <li><span class="font-bold">Hospital da Restauração (HR):</span> Para casos graves e traumáticos (Maior emergência do estado).</li>
+                        </ul>
+
+                        <h3 class="text-xl font-semibold mt-6 mb-2 text-pink-700">Para Denúncia e Apoio à Mulher</h3>
+                        <ul class="list-disc list-inside space-y-1 text-gray-700 ml-4">
+                            <li><span class="font-bold">Delegacia Especializada da Mulher:</span> O local adequado para registro de violência contra a mulher.</li>
+                            <li><span class="font-bold">Centro de Referência Clarice Lispector:</span> Oferece acolhimento, apoio psicossocial e orientação jurídica gratuita.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 6. CULTURA & LAZER (COM QUIZ) -->
+                <div id="lazer" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-indigo-700">Cultura & Lazer: Desvendando a Veneza Brasileira 🎭</h2>
+                        <p class="text-gray-700 mb-6">Recife é uma cidade de pontes, rios e rica história. Separei dicas de passeios inesquecíveis e informações importantes para você aproveitar o melhor da capital pernambucana!</p>
+                       
+                        <!-- Museus Imperdíveis -->
+                        <h3 class="text-xl font-semibold mb-3 text-indigo-800 border-b pb-1">📚 Museus e Espaços Culturais</h3>
+                        <div class="space-y-4 mb-6">
+                            <div class="p-3 bg-indigo-50 border-l-4 border-indigo-400 rounded-lg">
+                                <p class="font-bold text-lg text-indigo-700">Paço do Frevo & Cais do Sertão</p>
+                                <p class="text-sm text-gray-700">Dois pontos de parada essenciais no Recife Antigo. O Paço é a casa do Frevo (Patrimônio Imaterial) e o Cais é um tributo a Luiz Gonzaga e à cultura sertaneja. (Risco: Siga as dicas da aba "Risco" para a área central).</p>
+                            </div>
+                            <div class="p-3 bg-indigo-50 border-l-4 border-indigo-400 rounded-lg">
+                                <p class="font-bold text-lg text-indigo-700">Museu da Caixa Cultural</p>
+                                <p class="text-sm text-gray-700">Localizado na Av. Alfredo Lisboa, no centro, este museu é conhecido por suas exposições de arte moderna, fotografia e cinema, frequentemente com entrada gratuita. Excelente programação cultural.</p>
+                            </div>
+                            <div class="p-3 bg-indigo-50 border-l-4 border-indigo-400 rounded-lg">
+                                <p class="font-bold text-lg text-indigo-700">Museu de Cultura Afro Brasil Rolando Toro</p>
+                                <p class="text-sm text-gray-700">Um espaço de valorização da herança africana no Brasil, com foco em rituais e religiosidade. Fundamental para entender a formação cultural de Pernambuco. Fica no bairro de São José.</p>
+                            </div>
+                            <div class="p-3 bg-indigo-50 border-l-4 border-indigo-400 rounded-lg">
+                                <p class="font-bold text-lg text-indigo-700">Instituto Ricardo Brennand (IRB)</p>
+                                <p class="text-sm text-gray-700">Um complexo com castelo, pinacoteca, biblioteca e o maior acervo de arte de Frans Post fora da Holanda, além de uma impressionante coleção de armas brancas. É considerado um dos museus mais bonitos do país e fica em área de segurança controlada (Zona Oeste).</p>
+                            </div>
+                        </div>
+
+                        <!-- Passeios Icônicos e Aventura -->
+                        <h3 class="text-xl font-semibold mb-3 text-indigo-800 border-b pb-1">📍 Passeios & Experiências Únicas</h3>
+                        <div class="space-y-4 mb-6">
+                            <div class="p-3 bg-green-50 border-l-4 border-green-400 rounded-lg">
+                                <p class="font-bold text-lg text-green-700">Travessia até o Parque das Esculturas</p>
+                                <p class="text-sm text-gray-700">Esta é uma das vistas mais bonitas! O Parque (com o famoso Obelisco de Brennand) fica na ponta do arrecife. O acesso é feito por barco (baleeira) a partir do Marco Zero no Recife Antigo. <strong class="text-red-600">Dica de Segurança:</strong> Contrate o serviço apenas de barqueiros credenciados na área do Marco Zero. Não tente ir a pé ou nadando!</p>
+                            </div>
+                            <div class="p-3 bg-green-50 border-l-4 border-green-400 rounded-lg">
+                                <p class="font-bold text-lg text-green-700">Marco Zero e Praça do Arsenal</p>
+                                <p class="text-sm text-gray-700">O Marco Zero (Praça Rio Branco) é o ponto inicial das estradas de Pernambuco e o centro histórico. A Praça do Arsenal, logo ao lado, é famosa pelas casinhas coloridas e bares. Priorize a visita em horários de pico e eventos, ou use transporte por aplicativo até a porta em horários mais calmos (vide aba "Risco").</p>
+                            </div>
+                        </div>
+
+                        <!-- Curiosidades -->
+                        <h3 class="text-xl font-semibold mb-3 text-indigo-800 border-b pb-1">✨ Curiosidades de Recife</h3>
+                        <div class="space-y-3 mb-6">
+                            <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+                                <p class="font-bold text-lg text-yellow-700">A Veneza Brasileira</p>
+                                <p class="text-sm text-gray-700">Recife ganhou esse apelido devido aos seus três rios principais (Capibaribe, Beberibe e Jordão) e o alto número de pontes que conectam a ilha do Recife Antigo ao continente. São mais de 50 pontes!</p>
+                            </div>
+                            <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+                                <p class="font-bold text-lg text-yellow-700">Cidade com Maior Renda Per Capita do Nordeste</p>
+                                <p class="text-sm text-gray-700">Além de cultura, Recife é um polo econômico fortíssimo, sendo o centro tecnológico do estado e a cidade com o maior PIB per capita do Nordeste do Brasil.</p>
+                            </div>
+                        </div>
+
+
+                        <!-- Quiz de Frevo -->
+                        <div class="p-4 bg-teal-100 border-l-4 border-teal-500 rounded-lg mt-8">
+                            <h3 class="text-xl font-extrabold mb-2 text-teal-800">Quiz Cultural: Você Manja de Frevo?</h3>
+                            <p class="text-gray-700 mb-4 text-sm">Teste seus conhecimentos sobre o ritmo que é Patrimônio Cultural Imaterial da Humanidade.</p>
+
+                            <button id="toggle-quiz" class="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition duration-150 ease-in-out">
+                                Abrir Quiz
+                            </button>
+                           
+                            <div id="quiz-section" class="hidden mt-4">
+                                <div id="quiz-container" class="space-y-4">
+                                    <!-- Perguntas do quiz serão inseridas aqui pelo JS -->
+                                </div>
+                               
+                                <button id="submit-quiz" class="mt-6 w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition duration-150 ease-in-out">
+                                    Ver Resultado
+                                </button>
+
+                                <div id="quiz-result" class="mt-4 p-4 text-center hidden rounded-lg">
+                                    <p class="font-bold text-lg" id="result-message"></p>
+                                    <p id="score-details" class="text-sm mt-1"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+               
+                <!-- 7. CONTATOS DE EMERGÊNCIA -->
+                <div id="contatos" class="tab-pane hidden">
+                    <div class="card p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-yellow-700">Contatos de Emergência - Disque Rápido</h2>
+                        <p class="text-gray-700 mb-6">Clique no botão "Ligar" para discar imediatamente em dispositivos móveis. Em caso de perigo imediato, use o <span class="font-bold">Botão SOS</span>.</p>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-red-100 rounded-lg border border-red-300 flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-red-700">Polícia Militar (Emergência)</p>
+                                    <p class="text-xl text-red-900 font-extrabold">190</p>
+                                </div>
+                                <a href="tel:190" class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition">Ligar</a>
+                            </div>
+                            <div class="p-3 bg-red-100 rounded-lg border border-red-300 flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-red-700">SAMU (Ambulância)</p>
+                                    <p class="text-xl text-red-900 font-extrabold">192</p>
+                                </div>
+                                <a href="tel:192" class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition">Ligar</a>
+                            </div>
+                            <div class="p-3 bg-red-100 rounded-lg border border-red-300 flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-red-700">Corpo de Bombeiros</p>
+                                    <p class="text-xl text-red-900 font-extrabold">193</p>
+                                </div>
+                                <a href="tel:193" class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition">Ligar</a>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-lg border border-blue-300 flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-blue-700">Disque Denúncia Nacional (Violência contra Mulher)</p>
+                                    <p class="text-xl text-blue-900 font-extrabold">180</p>
+                                </div>
+                                <a href="tel:180" class="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition">Ligar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- Fim do Conteúdo das Abas -->
+
+        </div> <!-- Fim do App Container -->
+
+
+        <!-- BOTÃO SOS REDONDO E FIXO -->
+        <a href="tel:190" onclick="setTimeout(function(){ if (!document.hasFocus()) window.location.hash = '#contatos'; }, 500);" class="sos-button-fixed">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            190
+        </a>
+
+
+        <!-- Modal QR Code -->
+        <div id="qrCodeModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                <h3 class="text-xl font-bold mb-4 text-teal-700">Guia no seu Celular</h3>
+                <p class="mb-4 text-gray-700">Devido a um erro técnico (URL muito longa), o código QR exibe apenas um nome. Para acessar no celular, use o link completo:</p>
+                <ol class="list-decimal list-inside text-sm text-gray-700 text-left mx-auto max-w-xs mb-3 space-y-1">
+                    <li>Copie o link que está na barra de endereço (URL) do seu navegador.</li>
+                    <li>Cole o link em uma mensagem ou e-mail e envie para si mesmo.</li>
+                </ol>
+                <div id="qrcode" class="flex justify-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <!-- O QR Code será gerado aqui -->
+                </div>
+                <p class="text-xs text-red-500 mt-2 font-semibold">O código contém apenas o identificador. Copie o link completo!</p>
+                <button id="closeModal" class="mt-6 w-full py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition duration-150">
+                    Fechar
+                </button>
+            </div>
+        </div>
+
+    </div> <!-- Fim do Container Principal -->
+
+    <script>
+        // Função utilitária para notificação (substitui alert)
+    function showNotification(message, isError = false) {
+        const tempNotification = document.createElement('div');
+        tempNotification.textContent = message;
+        
+        // CORREÇÃO: Envolver a atribuição de className em crases (template string)
+        tempNotification.className = `fixed bottom-5 left-1/2 transform -translate-x-1/2 p-3 rounded-lg shadow-xl z-50 transition-opacity duration-300 ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+        
+        document.body.appendChild(tempNotification);
+        
+        setTimeout(() => {
+            tempNotification.style.opacity = '0';
+            setTimeout(() => tempNotification.remove(), 300);
+        }, 3000);
+    }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            const tabNavigation = document.getElementById('tab-navigation');
+            const qrCodeButton = document.getElementById('qrCodeButton');
+            const qrCodeModal = document.getElementById('qrCodeModal');
+            const closeModal = document.getElementById('closeModal');
+            const qrcodeContainer = document.getElementById('qrcode');
+            
+            let qrCodeInstance = null;
+            const validTabs = ['rastreamento', 'risco', 'bo', 'dicas', 'servicos', 'lazer', 'contatos', 'initial-screen'];
+    
+            // --- Lógica de Navegação e Deep Linking (Hash) ---
+    
+            function showScreen(screenId) {
+                tabPanes.forEach(pane => {
+                    pane.classList.add('hidden');
+                });
+                tabNavigation.classList.add('hidden');
+    
+                const targetPane = document.getElementById(screenId);
+                if (targetPane) {
+                    targetPane.classList.remove('hidden');
+                }
+    
+                if (screenId !== 'initial-screen') {
+                    tabNavigation.classList.remove('hidden');
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'bg-cyan-700', 'text-white');
+                        btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+                        if (btn.dataset.tab === screenId) {
+                            btn.classList.add('active', 'bg-cyan-700', 'text-white');
+                            btn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                        }
+                    });
+                }
+            }
+            
+            function handleNavigation() {
+                const hash = window.location.hash.substring(1);
+                if (validTabs.includes(hash)) {
+                    showScreen(hash);
+                } else {
+                    showScreen('initial-screen');
+                }
+            }
+    
+            window.addEventListener('hashchange', handleNavigation);
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    window.location.hash = tabName;
+                });
+            });
+    
+            document.querySelectorAll('.initial-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetHash = e.currentTarget.getAttribute('href');
+                    window.location.hash = targetHash.substring(1); // Remove '#'
+                });
+            });
+    
+            handleNavigation();
+    
+            // --- Lógica do QR Code (CORREÇÃO FINAL: URL BASE LIMPA / STRING CURTA) ---
+            qrCodeButton.addEventListener('click', () => {
+                qrCodeModal.classList.remove('hidden');
+                qrCodeModal.classList.add('flex');
+    
+                qrcodeContainer.innerHTML = ''; // Limpa o conteúdo anterior
+                
+                // CRUCIAL: Devido a um limite técnico do ambiente (URL muito longa), codificaremos apenas uma string curta
+                // para garantir que o QR Code GERE SEM ERROS. O link real deve ser copiado do navegador.
+                const urlToEncode = "RecifeSeguraApp - Acesso Via Link Direto";
+                
+                // CRIA SEMPRE uma nova instância do QR Code para garantir a renderização
+                qrCodeInstance = new QRCode(qrcodeContainer, {
+                    text: urlToEncode,
+                    width: 200,
+                    height: 200,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            });
+    
+            closeModal.addEventListener('click', () => {
+                qrCodeModal.classList.add('hidden');
+                qrCodeModal.classList.remove('flex');
+            });
+    
+            qrCodeModal.addEventListener('click', (e) => {
+                if (e.target === qrCodeModal) {
+                    qrCodeModal.classList.add('hidden');
+                    qrCodeModal.classList.remove('flex');
+                }
+            });
+    
+    
+            // --- Lógica de Rastreamento de Rota (Funcionalidade de Segurança) ---
+            const startTrackingButton = document.getElementById('start-tracking');
+            const stopTrackingButton = document.getElementById('stop-tracking');
+            const trackingContactInput = document.getElementById('tracking-contact');
+            const trackingOutputDiv = document.getElementById('tracking-output');
+            const trackingMessageP = document.getElementById('tracking-message');
+            const copyTrackingTextButton = document.getElementById('copy-tracking-text');
+            const trackingStatusBar = document.getElementById('tracking-status-bar');
+    
+            let trackingInterval = null;
+            let locationCounter = 0;
+    
+            function simulateLocationUpdate() {
+                locationCounter++;
+                const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const contact = trackingContactInput.value.trim() || "Meu Contato de Segurança";
+    
+                // Simulação de localização real (dentro da função que gera a localização)
+                const mockLat = -8.0578 + (Math.random() - 0.5) * 0.01;
+                const mockLon = -34.8821 + (Math.random() - 0.5) * 0.01;
+    
+                // 🌟 CORREÇÃO CRÍTICA APLICADA: URL do Google Maps com Template String correta
+                const mockLink = `https://www.google.com/maps/search/?api=1&query=${mockLat.toFixed(4)},${mockLon.toFixed(4)}`;
+                
+                // CORREÇÃO 1: Usando Template String (crases) para a mensagem
+                const message = `[🚨 ${time}] Atualização de Localização - Rota Segura com ${contact}
+    
+    Estou A CAMINHO na área de Recife/PE.
+    
+    🔗 Localização Atualizada (A cada 10s): ${mockLink}
+    
+    Status: OK. (Clique no link para me acompanhar).
+    `;
+    
+                // CORREÇÃO 2: Usando Template String (crases)
+                trackingStatusBar.textContent = `RASTREAMENTO ATIVO - Última atualização às ${time}`;
+                trackingMessageP.textContent = message;
+    
+                if (locationCounter === 1) {
+                    // CORREÇÃO 3: Usando Template String (crases) para a notificação
+                    showNotification(`Rastreamento INICIADO para ${contact}! Mensagem inicial copiada.`);
+                    copyToClipboard(message);
+                } 
+            }
+            function startTracking() {
+                if (trackingInterval) return;
+    
+                const contact = trackingContactInput.value.trim();
+                if (!contact) {
+                    showNotification("Por favor, insira o Nome do Contato de Segurança!", true);
+                    trackingContactInput.focus();
+                    return;
+                }
+    
+                locationCounter = 0; // Reset counter
+                trackingContactInput.disabled = true;
+                startTrackingButton.disabled = true;
+                startTrackingButton.textContent = "RASTREANDO...";
+                stopTrackingButton.disabled = false;
+                trackingOutputDiv.classList.remove('hidden');
+                trackingStatusBar.classList.add('tracking-status');
+                
+                // Primeira atualização imediata
+                simulateLocationUpdate();
+    
+                // Atualizações contínuas a cada 10 segundos
+                trackingInterval = setInterval(simulateLocationUpdate, 10000);
+            }
+    
+            function stopTracking() {
+                // Verifica se há um rastreamento ativo
+                if (!trackingInterval) return;
+                
+                // Interrompe o rastreamento e redefine as variáveis de controle
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+                trackingContactInput.disabled = false;
+                startTrackingButton.disabled = false;
+                startTrackingButton.textContent = "Iniciar Rastreamento";
+                stopTrackingButton.disabled = true;
+                trackingStatusBar.classList.remove('tracking-status');
+                
+                // Prepara as mensagens de finalização
+                const contact = trackingContactInput.value.trim() || "Contato de Segurança";
+                const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                // AQUI ESTÁ A CORREÇÃO (Template String com Crases)
+                const finalMessage = `[✅ ${time}] Cheguei ao meu destino em segurança.
+                
+    O rastreamento da Rota Segura com ${contact} foi FINALIZADO com sucesso.
+                
+    Obrigada por me acompanhar!`;
+            
+                // AQUI ESTÁ A CORREÇÃO (Template String com Crases)
+                trackingStatusBar.textContent = `RASTREAMENTO INATIVO - Parado às ${time}`;
+                trackingMessageP.textContent = finalMessage;
+                
+                // AQUI ESTÁ A CORREÇÃO (Template String com Crases)
+                showNotification(`Rastreamento FINALIZADO. Mensagem de segurança copiada.`);
+                copyToClipboard(finalMessage);
+            }
+    
+            function copyToClipboard(text) {
+                // Implementação do fallback para cópia de texto
+                const tempInput = document.createElement('textarea');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Falha ao copiar: ', err);
+                }
+                document.body.removeChild(tempInput);
+            }
+    
+            startTrackingButton.addEventListener('click', startTracking);
+            stopTrackingButton.addEventListener('click', stopTracking);
+            copyTrackingTextButton.addEventListener('click', () => {
+                copyToClipboard(trackingMessageP.textContent);
+                showNotification("Mensagem copiada para a área de transferência!");
+            });
+    
+    
+            // --- Lógica do Quiz de Frevo ---
+            const quizData = [
+                {
+                    question: "Qual instrumento musical é considerado o 'coração' do Frevo de Rua?",
+                    options: ["Tuba", "Trompete", "Saxofone", "Trombone"],
+                    answer: "Trompete"
+                },
+                {
+                    question: "Qual o nome do passista (dançarino) que se destaca no Frevo?",
+                    options: ["Bailarino", "Capoeirista", "Maracatuzeiro", "Passista"],
+                    answer: "Passista"
+                },
+                {
+                    question: "Qual o objeto que o passista de Frevo utiliza para auxiliar nos passos?",
+                    options: ["Chapéu", "Sombrinha (Guarda-chuva)", "Cajado", "Lenço"],
+                    answer: "Sombrinha (Guarda-chuva)"
+                }
+            ];
+    
+            const quizContainer = document.getElementById('quiz-container');
+            const quizSection = document.getElementById('quiz-section');
+            const submitQuizButton = document.getElementById('submit-quiz');
+            const toggleQuizButton = document.getElementById('toggle-quiz');
+            const quizResult = document.getElementById('quiz-result');
+            const resultMessage = document.getElementById('result-message');
+            const scoreDetails = document.getElementById('score-details');
+            let userAnswers = {};
+    
+            function renderQuiz() {
+                quizContainer.innerHTML = '';
+                quizData.forEach((item, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'p-4 bg-white rounded-lg border border-gray-200 shadow-sm';
+                    questionDiv.innerHTML = `<p class="font-semibold text-gray-800 mb-3">${index + 1}. ${item.question}</p>`;
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'space-y-2';
+    
+                    item.options.forEach(option => {
+                        const optionButton = document.createElement('button');
+                        optionButton.className = 'quiz-option w-full text-left p-3 rounded-lg border border-gray-100 text-gray-600 font-medium hover:border-teal-400';
+                        optionButton.textContent = option;
+                        optionButton.setAttribute('data-question-index', index);
+                        optionButton.setAttribute('data-option', option);
+                        
+                        optionButton.addEventListener('click', () => {
+                            document.querySelectorAll(`[data-question-index="${index}"]`).forEach(btn => {
+                                btn.classList.remove('bg-teal-200', 'border-teal-600');
+                            });
+    
+                            optionButton.classList.add('bg-teal-200', 'border-teal-600');
+                            userAnswers[index] = option;
+                        });
+                        optionsDiv.appendChild(optionButton);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    quizContainer.appendChild(questionDiv);
+                });
+            }
+    
+            function checkQuiz() {
+                let score = 0;
+                let isComplete = Object.keys(userAnswers).length === quizData.length;
+    
+                if (!isComplete) {
+                    showNotification("Por favor, responda todas as perguntas antes de finalizar o quiz!", true);
+                    return;
+                }
+    
+                quizData.forEach((item, index) => {
+                    const userAnswer = userAnswers[index];
+                    if (userAnswer === item.answer) {
+                        score++;
+                    }
+                });
+    
+                const percentage = (score / quizData.length) * 100;
+                quizResult.classList.remove('hidden');
+                
+                scoreDetails.textContent = `Você acertou ${score} de ${quizData.length} questões.`;
+    
+                if (percentage === 100) {
+                    resultMessage.textContent = "Parabéns! Você é um Mestre do Frevo!";
+                    quizResult.className = 'mt-4 p-4 text-center rounded-lg bg-green-100 text-green-800 font-extrabold';
+                } else if (percentage >= 50) {
+                    resultMessage.textContent = "Muito Bom! Conhece bem o Frevo, mas pode melhorar!";
+                    quizResult.className = 'mt-4 p-4 text-center rounded-lg bg-yellow-100 text-yellow-800 font-extrabold';
+                } else {
+                    resultMessage.textContent = "Continue explorando! Visite o Paço do Frevo para aprender mais!";
+                    quizResult.className = 'mt-4 p-4 text-center rounded-lg bg-red-100 text-red-800 font-extrabold';
+                }
+    
+                quizData.forEach((item, index) => {
+                    const buttons = document.querySelectorAll(`[data-question-index="${index}"]`);
+                    buttons.forEach(btn => {
+                        btn.disabled = true;
+                        const option = btn.getAttribute('data-option');
+                        
+                        btn.classList.remove('bg-teal-200', 'border-teal-600');
+    
+                        if (option === item.answer) {
+                            btn.classList.add('correct-answer', 'font-extrabold', 'border-green-600');
+                        } else if (option === userAnswers[index] && option !== item.answer) {
+                            btn.classList.add('incorrect-answer', 'font-extrabold', 'border-red-600');
+                        }
+                    });
+                });
+    
+                submitQuizButton.disabled = true;
+                submitQuizButton.textContent = "Resultado Exibido";
+            }
+    
+            toggleQuizButton.addEventListener('click', () => {
+                quizSection.classList.toggle('hidden');
+                if (quizSection.classList.contains('hidden')) {
+                    toggleQuizButton.textContent = "Abrir Quiz";
+                    quizResult.classList.add('hidden');
+                    submitQuizButton.disabled = false;
+                    submitQuizButton.textContent = "Ver Resultado";
+                    userAnswers = {};
+                    renderQuiz(); // Reset the quiz on close
+                } else {
+                    toggleQuizButton.textContent = "Fechar Quiz";
+                }
+            });
+    
+            submitQuizButton.addEventListener('click', checkQuiz);
+            
+            renderQuiz();
+        });
+    </script>
+</body>
+</html>
